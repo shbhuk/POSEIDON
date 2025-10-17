@@ -411,7 +411,7 @@ def forward_model(param_vector, planet, star, model, opac, data, wl, P, P_ref_se
 
         if (stellar_contam != None):
 
-            if ('one_spot' in stellar_contam):
+            if ('one_spot' in stellar_contam) | ('one_facula' in stellar_contam):
 
                 # Unpack stellar contamination parameters
                 f_het, _, _, T_het, _, \
@@ -621,6 +621,25 @@ def PyMultiNest_retrieval(planet, star, model, opac, data, prior_types,
 
                     cube[i] = ((cube[i] * (max_value - min_value)) + min_value)
 
+                # Uniform squared priors
+                elif (prior_types[parameter] == 'uniform_squared'):
+
+                    min_value = prior_ranges[parameter][0]
+                    max_value = prior_ranges[parameter][1]
+
+                    cube[i] = ((cube[i] * (max_value - min_value)) + min_value)**2
+
+                # Bounded HalfGaussian priors
+                elif (prior_types[parameter] == 'bounded_halfgaussian'):
+
+                    mean = prior_ranges[parameter][0]
+                    std = prior_ranges[parameter][1]
+                    min_value = prior_ranges[parameter][2]
+                    max_value = prior_ranges[parameter][3]
+
+                    cube[i] = ((cube[i] * (max_value - min_value)) + min_value)
+
+                
                 # Gaussian priors
                 elif (prior_types[parameter] == 'gaussian'):
 
@@ -867,6 +886,20 @@ def PyMultiNest_retrieval(planet, star, model, opac, data, prior_types,
         _, stellar_params, \
         _, _ = split_params(cube, N_params_cum)
 
+        # Reject models with facula cooler than photosphere (by definition)
+        if ((stellar_contam != None) and ('one_facula' in stellar_contam)):
+
+            # Unpack stellar contamination parameters
+            _, _, _, T_het, \
+            _, _, T_phot, \
+            _, _, _, _ = unpack_stellar_params(param_names, star, stellar_params, 
+                                               stellar_contam, N_params_cum)
+                            
+            if (T_het < T_phot):
+                loglikelihood = -1.0e100   
+                return loglikelihood
+
+        
         # Reject models with spots hotter than faculae (by definition)
         if ((stellar_contam != None) and ('two_spots' in stellar_contam)):
 

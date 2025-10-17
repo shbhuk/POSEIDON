@@ -102,14 +102,15 @@ def create_star(R_s, T_eff, log_g, Met, T_eff_error = 100.0, log_g_error = 0.1,
                       Goettingen-HiRes [for pymsg] / user).
         stellar_contam (str):
             Chosen prescription for modelling unocculted stellar contamination
-            (Options: one_spot / one_spot_free_log_g / two_spots).
+            (Options: one_spot / one_spot_free_log_g / one_facula / one_facula_free_log_g /
+             two_spots / two_spots_free_log_g).
         f_het (float):
-            For the 'one_spot' model, the fraction of stellar photosphere 
+            For the 'one_spot' or 'one_facula' model, the fraction of stellar photosphere 
             covered by either spots or faculae.
         T_het (float):
-            For the 'one_spot' model, the temperature of the heterogeneity (K).
+            For the 'one_spot' or 'one_facula' model, the temperature of the heterogeneity (K).
         log_g_het (float):
-            For the 'one_spot' model, the log g of the heterogeneity (log10(cm/s^2)).
+            For the 'one_spot' or 'one_facula' model, the log g of the heterogeneity (log10(cm/s^2)).
         f_spot (float):
             For the 'two_spots' model, the fraction of stellar photosphere 
             covered by spots.
@@ -222,7 +223,7 @@ def create_star(R_s, T_eff, log_g, Met, T_eff_error = 100.0, log_g_error = 0.1,
         I_fac = None 
 
     # For non-uniform stellar surfaces
-    elif ('one_spot' in stellar_contam):
+    elif ('one_spot' in stellar_contam) | ('one_facula' in stellar_contam):
 
         # If log g not specified for the heterogeneities, set to photosphere
         if (log_g_het == None):
@@ -284,7 +285,7 @@ def create_star(R_s, T_eff, log_g, Met, T_eff_error = 100.0, log_g_error = 0.1,
         
     else:
         raise Exception("Error: unsupported heterogeneity type. Supported " +
-                        "types are: None, 'one_spot', 'two_spots'")
+                        "types are: None, 'one_spot', 'one_facula', 'two_spots'")
 
     # Package stellar properties
     star = {'R_s': R_s, 'T_eff': T_eff, 'T_eff_error': T_eff_error,
@@ -424,8 +425,8 @@ def define_model(model_name, bulk_species, param_species,
             (Options: fixed / free).
         stellar_contam (str):
             Chosen prescription for modelling unocculted stellar contamination
-            (Options: one_spot / one_spot_free_log_g / two_spots / 
-             two_spots_free_log_g).
+            (Options: one_spot / one_spot_free_log_g / one_facula / one_facula_free_log_g /
+             two_spots / two_spots_free_log_g).
         nightside_contam (bool):
             If True, include the impact of nightside thermal emission on a 
             transmission spectrum (nightside contamination).   

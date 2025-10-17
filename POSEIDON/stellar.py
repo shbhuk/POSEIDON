@@ -89,6 +89,8 @@ def load_stellar_pysynphot(wl_out, T_eff, Met, log_g, stellar_grid = 'cbk04'):
         sp = psyn.Icat('ck04models', T_eff, Met, log_g)
     elif (stellar_grid == 'phoenix'):
         sp = psyn.Icat('phoenix', T_eff, 0.0, log_g)   # Some Phoenix models with Met =/= 0 have issues...
+    elif (stellar_grid == 'new_era'):
+        sp = psyn.Icat('new_era', T_eff, Met, log_g)
     else:
         raise Exception("Unsupported stellar grid")
 
@@ -229,7 +231,8 @@ def precompute_stellar_spectra(comm, wl_out, star, prior_types, prior_ranges,
             for each free parameter in the retrieval model.
         stellar_contam (str):
             Chosen prescription for modelling unocculted stellar contamination
-            (Options: one_spot / one_spot_free_log_g / two_spots).
+            (Options: one_spot / one_spot_free_log_g / one_facula / one_facula_free_log_g /
+             two_spots / two_spots_free_log_g).
         stellar_grid (str):
             Desired stellar model grid
             (Options: cbk04 / phoenix / sphinx).
@@ -386,7 +389,7 @@ def precompute_stellar_spectra(comm, wl_out, star, prior_types, prior_ranges,
 
     #***** Find heterogeneity grid ranges *****#
 
-    if ('one_spot' in stellar_contam):
+    if ('one_spot' in stellar_contam) | ('one_facula' in stellar_contam):
 
         T_het_min = prior_ranges['T_het'][0]
         T_het_max = prior_ranges['T_het'][1]
@@ -416,7 +419,7 @@ def precompute_stellar_spectra(comm, wl_out, star, prior_types, prior_ranges,
     # For free log g, we also need to interpolate over a range of stellar log g
     if ('free_log_g' in stellar_contam):
 
-        if ('one_spot' in stellar_contam):
+        if ('one_spot' in stellar_contam) | ('one_facula' in stellar_contam):
 
             log_g_het_min = prior_ranges['log_g_het'][0]
             log_g_het_max = prior_ranges['log_g_het'][1]
@@ -515,7 +518,8 @@ def precompute_stellar_spectra_OLD(wl_out, star, prior_types, prior_ranges,
             for each free parameter in the retrieval model.
         stellar_contam (str):
             Chosen prescription for modelling unocculted stellar contamination
-            (Options: one_spot / one_spot_free_log_g / two_spots).
+            (Options: one_spot / one_spot_free_log_g / one_facula / one_facula_free_log_g /
+             two_spots / two_spots_free_log_g).
         stellar_grid (str):
             Desired stellar model grid
             (Options: cbk04 / phoenix).
@@ -642,7 +646,7 @@ def precompute_stellar_spectra_OLD(wl_out, star, prior_types, prior_ranges,
 
     #***** Find heterogeneity grid ranges *****#
 
-    if ('one_spot' in stellar_contam):
+    if ('one_spot' in stellar_contam) | ('one_facula' in stellar_contam):
 
         T_het_min = prior_ranges['T_het'][0]
         T_het_max = prior_ranges['T_het'][1]
@@ -672,7 +676,7 @@ def precompute_stellar_spectra_OLD(wl_out, star, prior_types, prior_ranges,
     # For free log g, we also need to interpolate over a range of stellar log g
     if ('free_log_g' in stellar_contam):
 
-        if ('one_spot' in stellar_contam):
+        if ('one_spot' in stellar_contam) | ('one_facula' in stellar_contam):
 
             log_g_het_min = prior_ranges['log_g_het'][0]
             log_g_het_max = prior_ranges['log_g_het'][1]
@@ -827,7 +831,7 @@ def stellar_contamination(star, wl_out):
     I_phot_interp = spectres(wl_out, wl_s, I_phot)
 
     # For a single heterogeneity
-    if ('one_spot' in stellar_contam):
+    if ('one_spot' in stellar_contam) | ('one_facula' in stellar_contam):
 
         # Unpack relevant stellar properties
         f_het = star['f_het']

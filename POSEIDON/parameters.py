@@ -49,8 +49,8 @@ def assign_free_params(param_species, object_type, PT_profile, X_profile,
             (Options: fixed / free).
         stellar_contam (str):
             Chosen prescription for modelling unocculted stellar contamination
-            (Options: one_spot / one_spot_free_log_g / two_spots / 
-             two_spots_free_log_g).
+            (Options: one_spot / one_spot_free_log_g / one_facula / one_facula_free_log_g /
+             two_spots / two_spots_free_log_g).
         offsets_applied (str):
             Whether a relative offset should be applied to a dataset 
             (Options: single_dataset / two_datasets / three_datasets).
@@ -736,6 +736,10 @@ def assign_free_params(param_species, object_type, PT_profile, X_profile,
     if (stellar_contam == 'one_spot'):
         stellar_params += ['f_het', 'T_het', 'T_phot']
     elif (stellar_contam == 'one_spot_free_log_g'):
+        stellar_params += ['f_het', 'T_het', 'T_phot', 'log_g_het', 'log_g_phot']
+    elif (stellar_contam == 'one_facula'):
+        stellar_params += ['f_het', 'T_het', 'T_phot']
+    elif (stellar_contam == 'one_facula_free_log_g'):
         stellar_params += ['f_het', 'T_het', 'T_phot', 'log_g_het', 'log_g_phot']
     elif (stellar_contam == 'two_spots'):
         stellar_params += ['f_spot', 'f_fac', 'T_spot', 'T_fac', 'T_phot']
@@ -1977,8 +1981,8 @@ def unpack_stellar_params(param_names, star, stellar_in, stellar_contam,
             Drawn values of the stellar parameters.
         stellar_contam (str):
             Chosen prescription for modelling unocculted stellar contamination
-            (Options: one_spot / one_spot_free_log_g / two_spots / 
-             two_spots_free_log_g).
+            (Options: one_spot / one_spot_free_log_g / one_facula / one_facula_free_log_g /
+             two_spots / two_spots_free_log_g).
         N_params_cumulative (np.array of int):
             Cumulative sum of number of parameters (used for indexing).
 
@@ -1993,7 +1997,7 @@ def unpack_stellar_params(param_names, star, stellar_in, stellar_contam,
             For the 'two_spots' model, the fraction of stellar photosphere 
             covered by faculae.
         T_het (float):
-            For the 'one_spot' model, the temperature of the heterogeneity (K).
+            For the 'one_spot' or 'one_facula' model, the temperature of the heterogeneity (K).
         T_spot (float):
             For the 'two_spots' model, the temperature of the spot (K).
         T_fac (float):
@@ -2001,7 +2005,7 @@ def unpack_stellar_params(param_names, star, stellar_in, stellar_contam,
         T_phot (float):
             Stellar photosphere temperature (K).
         log_g_het (float):
-            For the 'one_spot' model, the log g of the heterogeneity (log10(cm/s^2)).
+            For the 'one_spot' or 'one_facula' model, the log g of the heterogeneity (log10(cm/s^2)).
         log_g_spot (float):
             For the 'two_spots' model, the log g of the spot (log10(cm/s^2)).
         log_g_fac (float):
@@ -2020,7 +2024,7 @@ def unpack_stellar_params(param_names, star, stellar_in, stellar_contam,
     log_g_phot_obs = star['log_g']
 
     # Extract parameters for a single stellar heterogeneity
-    if ('one_spot' in stellar_contam):
+    if ('one_spot' in stellar_contam) | ('one_facula' in stellar_contam):
 
         f_het = np.array(stellar_in[np.where(stellar_param_names == 'f_het')[0][0]])
         T_het = np.array(stellar_in[np.where(stellar_param_names == 'T_het')[0][0]])

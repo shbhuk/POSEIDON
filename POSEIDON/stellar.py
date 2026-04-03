@@ -89,8 +89,8 @@ def load_stellar_pysynphot(wl_out, T_eff, Met, log_g, stellar_grid = 'cbk04'):
         sp = psyn.Icat('ck04models', T_eff, Met, log_g)
     elif (stellar_grid == 'phoenix'):
         sp = psyn.Icat('phoenix', T_eff, 0.0, log_g)   # Some Phoenix models with Met =/= 0 have issues...
-    elif (stellar_grid == 'new_era'):
-        sp = psyn.Icat('new_era', T_eff, Met, log_g)
+    elif (stellar_grid == 'newera'):
+        sp = psyn.Icat('newera', T_eff, 0.0, log_g)
     else:
         raise Exception("Unsupported stellar grid")
 
